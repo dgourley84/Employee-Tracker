@@ -308,3 +308,27 @@ addValue = () => {
         }
       });
 }
+
+
+
+
+
+
+//view budget function for the departments
+viewBudget = () => {
+    const query = `SELECT departments.dept_id AS Dept_ID, departments.name as Department_Name, CONCAT('$', FORMAT(SUM(salary),0)) AS Budget
+    FROM roles
+    INNER JOIN employees USING (role_id)
+    INNER JOIN departments ON roles.dept_id = departments.dept_id
+    GROUP BY roles.dept_id;`;
+    connection.query(query,(err,res)=>{
+        if (err) throw err;
+        console.log(` `);
+        console.log(chalk.green.bold(`====================================================================================`));
+        console.log(`                              ` + chalk.red.bold(`Department Budgets:`));
+        console.table(res);
+        console.log(chalk.green.bold(`====================================================================================`));
+        console.log(` `);
+        initialQuery();
+    })
+}
