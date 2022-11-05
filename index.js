@@ -309,10 +309,96 @@ addValue = () => {
       });
 }
 
+//update the role of an employee
+updateRole = () => {
+    let listOfEmployees = [];
+    let listOfRoles =[];
+    let employeeLastName = null;
+    
+    //ask for the last name of the employee to be updated
+    inquirer
+        .prompt([
+            {
+                name: "empLastName",
+                type: "input",
+                message:
+                    "What is the last name of the employee you would like to update?",
+            }
+        ])
+        // seearch DB for employees with the last name and puts them into array
+    .then((answer)=>{
+        employeeLastName = answer.empLastName;
+        //query to find all relevant employees
+        //put into arry for another inquirer question
+        //display in a table
+        const query = `SELECT emp_id AS Employee_ID, first_name AS First_Name, last_name AS Last_Name, title AS Title, salary AS Salary, departments.name AS Department FROM employees 
+        INNER JOIN roles ON employees.role_Id = roles.role_id
+        INNER JOIN departments ON roles.dept_id = departments.dept_id 
+        WHERE ?`;
+        connection.query(query,{last_name: answer.empLastName},(err, res)=>{
+            if (err) throw err;
 
-
-
-
+            console.log(` `)
+            console.log(chalk.green.bold(`====================================================================================`));
+            console.log(`                              ` + chalk.red.bold(`Employee Information:`));
+            console.table(res);
+            console.log(chalk.green.bold(`====================================================================================`));
+            console.log(` `);
+            listOfEmployees = res.map(employee => (
+                {
+                    name: employee.First_Name,
+                    value: employee.Employee_ID
+                }
+            ));
+            //query db to find all roles and put into a tbale and array for a inquirer question
+            connection.query("SELECT * FROM roles", (err,res) => {
+                if (err) throw err;
+                listOfRoles = res.map(role =>(
+                    {
+                        name: role.title,
+                        value: role.role_id
+                    }
+                ))
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "nameConfirm",
+                    message: "Please select the employee to confirm",
+                    choices: listOfEmployees
+                  },
+                  {
+                    type: "list",
+                    name: "roleChoice",
+                    message: "Please select a new role for the employee",
+                    choices: listOfRoles
+                  }
+            ])
+            .then((answers)=>{
+                const query = `UPDATE employees SET role_id = ${answers.roleChoice} WHERE emp_id = ${answers.nameConfirm}`;
+                connection.query (query,(err,res)=>{
+                    if (err) throw err;
+                });
+            })
+            .then(()=>{
+                const query =`SELECT emp_id AS Employee_ID, first_name AS First_Name, last_name AS Last_Name, title AS Title, salary AS Salary, departments.name AS Department FROM employees 
+                INNER JOIN roles ON employees.role_Id = roles.role_id
+                INNER JOIN departments ON roles.dept_id = departments.dept_id 
+                WHERE ?`;
+                connection.query(query,{last_name:employeeLastName},(err,res)=>{
+                    if (err) throw err;
+                    console.log(` `);
+                    console.log(chalk.green.bold(`====================================================================================`));
+                    console.log(`                              ` + chalk.red.bold(`Updated Employee Information:`));
+                    console.table(res);
+                    console.log(chalk.green.bold(`====================================================================================`));
+                    console.log(` `);
+                    initialQuery();
+                })
+            });
+            });
+        });
+    });
+}
 
 //view budget function for the departments
 viewBudget = () => {
