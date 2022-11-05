@@ -23,12 +23,12 @@ VALUES
 
 -- EMPLOYEES
 -- Create managers who do not have a manager so that employees with managers have correct manager_id
-INSERT INTO employee (first_name, last_name, role_id)
+INSERT INTO Employees (first_name,last_name,role_id)
 VALUES 
 ("Michael", "Scott", 2),
 ("Angela", "Martin", 3),
 ("Darryl", "Philbin", 5),
-("Dallas", "Gourley", 4);
+("Dallas", "Gourley", 3);
 
 -- Create employees
 INSERT INTO Employees (first_name,last_name,role_id,manager_id)

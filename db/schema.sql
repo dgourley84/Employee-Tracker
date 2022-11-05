@@ -5,13 +5,13 @@ USE goolies_goons_DB;
 
 CREATE TABLE Departments (
   dept_id INTEGER AUTO_INCREMENT,
-  name VARCHAR(30) NOT NULL,
+  name VARCHAR(100) NOT NULL,
   PRIMARY KEY (dept_id)
 );
 
 CREATE TABLE Roles (
   role_id INTEGER AUTO_INCREMENT,
-  title VARCHAR(30) NOT NULL,
+  title VARCHAR(100) NOT NULL,
   salary DECIMAL(10,2) NULL,
   dept_id INTEGER,
   PRIMARY KEY (role_id),
@@ -20,8 +20,8 @@ CREATE TABLE Roles (
 
 CREATE TABLE Employees (
   emp_id INTEGER AUTO_INCREMENT,
-  first_name VARCHAR(30) NOT NULL,
-  last_name VARCHAR(30),
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100),
   role_id INTEGER,
   manager_id INTEGER,
   PRIMARY KEY (emp_id),
