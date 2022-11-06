@@ -38,13 +38,17 @@
 ---
 ## User Story
   
+
+
 ---
 ## Acceptance Criteria
   
   
 ---
 ## Visuals:
-  ![]()
+  ![Schema](/media/12-sql-homework-demo-01.png)
+  ![Seeds](/media/Seeds.png)
+
 ---
 ## Installation:
 
