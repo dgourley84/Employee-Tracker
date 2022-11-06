@@ -43,8 +43,13 @@ initialQuery = () => {
                 "View department, roles or employees",
                 "Add department, roles or employees",
                 "Update employee role",
+                "Update employee manager",
                 "Remove employee",
+                "Remove role",
+                "Remove department",
                 "View department budgets",
+                "View employees by manager",
+                "View employees by department",
                 "Exit",
             ],
         })
@@ -61,14 +66,34 @@ initialQuery = () => {
               case "Update employee role":
                 updateRole();
                 break;
+                
+              case "Update employee manager":
+                updateManager();
+                break;
       
               case "Remove employee":
-                  removeEmp();
-                  break;
-      
+                removeEmp();
+                break;
+                
+              case "Remove role":
+                removeRole();
+                break;
+
+              case "Remove department":
+                removeDept();
+                break;
+              
               case "View department budgets":
-                  viewBudget();
-                  break;
+                viewBudget();
+                break;
+
+              case "View employees by manager":
+                viewEmployeeMgr();
+                break;
+
+              case "View employees by department":
+                viewEmployeeDept();
+                break;
       
               case "Exit":
                 connection.end();
@@ -114,10 +139,10 @@ viewTable = () => {
                     initialQuery();
                 });
             } else if (val.view_table === "Employees"){
-                const query = `SELECT emp_id AS Employee_ID, first_name AS First_Name, last_name AS Last_Name, title AS Title, CONCAT('$',FORMAT(salary,0)) AS Salary, departments.name AS Department
-                FROM employees
-                INNER JOIN roles ON employees.role_Id = roles.role_id
-                INNER JOIN departments ON roles.dept_id = departments.dept_id
+                const query = `SELECT employees.emp_id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, 
+                e2.first_name AS manager FROM employees LEFT JOIN employees as e2 ON e2.emp_id = employees.manager_id 
+                JOIN roles ON employees.role_id = roles.role_id 
+                JOIN departments ON roles.dept_id = departments.dept_id                    
                 ORDER BY last_name ASC`
                 connection.query(query, (err,res)=>{
                     if (err) throw err;
@@ -309,10 +334,294 @@ addValue = () => {
       });
 }
 
+//View employees by department
+viewEmployeeDept = () => {
+ // Query the database for all available departments to prompt user
+ connection.query("SELECT * FROM departments", function (err, results) {
+  if (err) throw err;
+  inquirer
+      .prompt([
+          {
+              name: "department",
+              type: "list",
+              choices: function () {
+                  let choiceArray = [];
+                  for (var i = 0; i < results.length; i++) {
+                      choiceArray.push(results[i].name);
+                  }
+                  return choiceArray;
+              },
+              message: "What department would you like to search by?"
+          }
+      ])
+      .then(function (answer) {
+          console.log(answer.department);
+          let query = 'SELECT employees.emp_id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, e2.first_name AS manager FROM employees LEFT JOIN employees as e2 ON e2.emp_id = employees.manager_id JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.dept_id = departments.dept_id WHERE departments.name = ? ORDER BY employees.emp_id'
+          connection.query(query, answer.department, function (err, res) {
+              if (err) throw err;
+              console.log(' ');
+                    console.log(chalk.green.bold(`====================================================================================`));
+                    console.log(`                              ` + chalk.red.bold(`View by departments:`));
+                    console.table(res);
+                    console.log(chalk.green.bold(`====================================================================================`));
+                    console.log(' ');
+                    initialQuery();
+          });
+      });
+});
+};   
 
+//View employees by manager
+viewEmployeeMgr = () => {
+  connection.query("SELECT DISTINCT e2.first_name, e2.last_name FROM employees LEFT JOIN employees AS e2 ON employees.manager_id = e2.emp_id WHERE e2.first_name IS NOT NULL", function (err, results) {
+  if (err) throw err;
+  inquirer
+      .prompt([
+          {
+              name: "manager",
+              type: "list",
+              choices: function () {
+                  let choiceArray = [];
+                  for (var i = 0; i < results.length; i++) {
+                      choiceArray.push(results[i].first_name);
+                  }
+                  return choiceArray;
+              },
+              message: "Which manager would you like to search by?"
+          }
+      ])
+      .then(function (answer) {
+          console.log(answer.manager);
+          let query = 'SELECT employees.emp_id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, e2.first_name AS manager FROM employees LEFT JOIN employees AS e2 ON e2.emp_id = employees.manager_id JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.dept_id = departments.dept_id WHERE e2.first_name = ? ORDER BY employees.emp_id;'
+          connection.query(query, answer.manager, function (err, res) {
+              if (err) throw err;
+              console.log(' ');
+                    console.log(chalk.green.bold(`====================================================================================`));
+                    console.log(`                              ` + chalk.red.bold(`View by managers:`));
+                    console.table(res);
+                    console.log(chalk.green.bold(`====================================================================================`));
+                    console.log(' ');
+                    initialQuery();
+          });
+      });
+});
+  
+}
 
+//remove employee
+removeEmp = () => {
+    connection.query("SELECT * FROM employees", function (err, results) {
+      if (err) throw err;
+      inquirer
+          .prompt([
+              {
+                  name: "removeEmployee",
+                  type: "list",
+                  choices: function () {
+                      let choiceArray = [];
+                      for (var i = 0; i < results.length; i++) {
+                          choiceArray.push(results[i].first_name);
+                      }
+                      return choiceArray;
+                  },
+                  message: "Which employee would you like to remove?"
+              }
+          ])
+          .then(function (answer) {
+              let query = 'DELETE FROM employees WHERE first_name = ?;'
+              connection.query(query, answer.removeEmployee, function (err, res) {
+                  if (err) throw err;
+                  console.log("Employee successfully deleted");
+                  initialQuery();
+              });
+          });
+  });
+}
 
+//remove role
+removeRole = () => {
+  connection.query("SELECT * FROM roles", function (err, results) {
+    if (err) throw err;
+    inquirer
+        .prompt([
+            {
+                name: "removeRole",
+                type: "list",
+                choices: function () {
+                    let choiceArray = [];
+                    for (var i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].title);
+                    }
+                    return choiceArray;
+                },
+                message: "Which role would you like to remove?"
+            }
+        ])
+        .then(function (answer) {
+            let query = 'DELETE FROM roles WHERE title = ?;'
+            connection.query(query, answer.removeRole, function (err, res) {
+                if (err) throw err;
+                console.log("Role successfully deleted");
+                initialQuery();
+            });
+        });
+});
+}
 
+//remove department
+removeDept = () => {
+  connection.query("SELECT * FROM departments", function (err, results) {
+    if (err) throw err;
+    inquirer
+        .prompt([
+            {
+                name: "removeDept",
+                type: "list",
+                choices: function () {
+                    let choiceArray = [];
+                    for (var i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].name);
+                    }
+                    return choiceArray;
+                },
+                message: "Which department would you like to remove?"
+            }
+        ])
+        .then(function (answer) {
+            let query = 'DELETE FROM departments WHERE name = ?;'
+            connection.query(query, answer.removeDept, function (err, res) {
+                if (err) throw err;
+                console.log("Department successfully deleted");
+                cb();
+            });
+        });
+});
+}
+
+//update role of employee
+updateRole = () => {
+  let newRole = {};
+
+  connection.query("SELECT employees.emp_id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, e2.first_name AS manager FROM employees LEFT JOIN employees AS e2 ON e2.emp_id = employees.manager_id JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.dept_id = departments.dept_id ORDER BY employees.emp_id", 
+  function (err, results) {
+      if (err) throw err;
+      inquirer
+          .prompt([
+              {
+                  name: "updateEmployee",
+                  type: "list",
+                  choices: function () {
+                      let choiceArray = [];
+                      for (var i = 0; i < results.length; i++) {
+                          choiceArray.push(results[i].first_name);
+                      }
+                      return choiceArray;
+                  },
+                  message: "Which employee would you like to update?"
+              }
+          ])
+          .then(function (answer) {
+
+              newRole.first_name = answer.updateEmployee;
+
+              connection.query("SELECT * FROM roles", function (err, res) {
+                  if (err) throw err;
+                  inquirer
+                      .prompt([
+                          {
+                              name: "updateRole",
+                              type: "list",
+                              choices: function () {
+                                  let choiceArray = [];
+                                  for (var i = 0; i < results.length; i++) {
+                                      choiceArray.push(results[i].title);
+                                  }
+                                  return choiceArray;
+                              },
+                              message: "What would you like you to change their role title to?"
+                          }
+                      ])
+                      .then(function (answer) {
+                          // Translate role to role_id
+                          connection.query("SELECT * FROM roles WHERE title = ?", answer.updateRole, function (err, results) {
+                              if (err) throw err;
+
+                              newRole.role_id = results[0].role_id;
+
+                              connection.query("UPDATE employees SET role_id = ? WHERE first_name = ?", [newRole.role_id, newRole.first_name], function (err, res) {
+                                  if (err) throw (err);
+                                  console.log('Employee role successfully updated.');
+                                  initialQuery();
+                              })
+
+                          })
+                      });
+              });
+          });
+  })
+}
+
+//update manager of employee
+updateManager = () => {
+  let newManager = {};
+
+    connection.query("SELECT employees.emp_id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, e2.first_name AS manager FROM employees LEFT JOIN employees AS e2 ON e2.emp_id = employees.manager_id JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.dept_id = departments.dept_id ORDER BY employees.emp_id",
+    function (err, results) {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    name: "updateEmployee",
+                    type: "list",
+                    choices: function () {
+                        let choiceArray = [];
+                        for (var i = 0; i < results.length; i++) {
+                            choiceArray.push(results[i].first_name);
+                        }
+                        return choiceArray;
+                    },
+                    message: "Which employee would you like to update?"
+                }
+            ])
+            .then(function (answer) {
+
+                newManager.first_name = answer.updateEmployee;
+
+                connection.query("SELECT * FROM employees", function (err, res) {
+                    if (err) throw err;
+                    inquirer
+                        .prompt([
+                            {
+                                name: "updateManager",
+                                type: "list",
+                                choices: function () {
+                                    let choiceArray = [];
+                                    for (var i = 0; i < results.length; i++) {
+                                        choiceArray.push(results[i].first_name);
+                                    }
+                                    return choiceArray;
+                                },
+                                message: "Who would you like to change their manager to?"
+                            }
+                        ])
+                        .then(function (answer) {
+                            connection.query("SELECT * FROM employees WHERE first_name = ?", answer.updateManager, function (err, results) {
+                                if (err) throw err;
+
+                                newManager.manager_id = results[0].emp_id;
+
+                                connection.query("UPDATE employees SET manager_id = ? WHERE first_name = ?", [newManager.manager_id, newManager.first_name], function (err, res) {
+                                    if (err) throw (err);
+                                    console.log('Employee manager successfully updated.');
+                                    initialQuery();
+                                })
+
+                            })
+                        });
+                });
+            });
+    })
+}
 
 //view budget function for the departments
 viewBudget = () => {
