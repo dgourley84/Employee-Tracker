@@ -334,6 +334,7 @@ addValue = () => {
       });
 }
 
+
 //View employees by department
 viewEmployeeDept = () => {
  // Query the database for all available departments to prompt user
@@ -621,6 +622,7 @@ updateManager = () => {
                 });
             });
     })
+
 }
 
 //view budget function for the departments
