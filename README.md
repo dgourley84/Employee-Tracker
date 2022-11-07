@@ -32,15 +32,17 @@
 ---
 ## Usage
   
-  Install the applicaiton dependancies using the above command, initialize the database in mysql by running mysql -u <user> -p <password>. Then, source db/schema.sql followed by source db/seeds.sql. Now that the database is initialized, run npm start to run the CLI application and interacti with it as you wish.
+  Install the applicaiton dependancies using the above command, initialize the database in mysql by running mysql -u ```<user>``` -p ```<password>```. Then, source db/schema.sql followed by source db/seeds.sql. 
+  
+  Now that the database is initialized, run npm start to run the CLI application and interacti with it as you wish.
 
   When a user starts the application, they are presented with a series of prompts, randing from view database information to changing or deleting information.
 
-  ![Seeds]()
+  ![Prompt Page](./media/Prompt_screen.png)
 
   After selecting a prompt, the application will handle the user request by querying the database and returning the data in a ```console.table``` command for easy reading. An example output is below:
 
-  ![Seeds]()
+  ![Output](./media/Department_budgets.png)
 
   After the output is returned, the application will provide the user with another opportunity to select a new way to interact with the database - the same way that the user is prompted when the application is first started.
 
@@ -87,11 +89,16 @@ THEN I am prompted to select an employee to update and their new role and this i
 ### Video demo
   A video demonstraction of the app can be viewed here:
 
+  https://drive.google.com/file/d/1FAX-BmZxQlNztFyY5cs33SfzIOhvadh-/view
 
 ---
 ## Installation:
 
   To Install and run this application yourself, follow the below step(s).
+
+  ```bash
+  npm i
+  ```
 
 ---
 ## License
@@ -115,7 +122,7 @@ THEN I am prompted to select an employee to update and their new role and this i
 
 ## Tests:
 
-  This app does not have any tests.
+  This app does not have any tests. However in ```media``` folder of repository are a number of screenshots showing the functionality of the app which were used to test the working of the app.
 
 ---
 ## Authors & Acknowledgments
